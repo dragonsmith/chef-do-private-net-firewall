@@ -1,0 +1,63 @@
+---
+driver:
+  name: vagrant
+  network:
+    - ["private_network", {ip: "192.168.33.33"}]
+
+provisioner:
+  name: chef_zero
+  # log_level: debug
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: bento/ubuntu-14.04
+  - name: bento/ubuntu-16.04
+  - name: bento/debian-8.9
+  - name: bento/debian-9.2
+  - name: ubuntu-14.04-chef-12
+    driver:
+      box: bento/ubuntu-14.04
+    provisioner:
+      require_chef_omnibus: 12.21.14
+  - name: ubuntu-16.04-chef-12
+    driver:
+      box: bento/ubuntu-16.04
+    provisioner:
+      require_chef_omnibus: 12.21.14
+  - name: debian-8.9-chef-12
+    driver:
+      box: bento/debian-8.9
+    provisioner:
+      require_chef_omnibus: 12.21.14
+  - name: debian-9.2-chef-12
+    driver:
+      box: bento/debian-9.2
+    provisioner:
+      require_chef_omnibus: 12.21.14
+
+suites:
+  - name: default
+    attributes:
+      firewall:
+        allow_loopback: true
+        allow_icmp: true
+        allow_ssh: true
+        allow_established: true
+      consul:
+        config:
+          bootstrap_expect: 1
+          server: true
+          ui: true
+          encrypt: "CGXC2NsXW4AvuB4h5ODYzQ=="
+          datacenter: example-dc
+          verify_outgoing: true
+          verify_incoming: true
+    data_bags_path: test/data_bags/
+    encrypted_data_bag_secret_key_path: test/encrypted_data_bag_secret
+    run_list:
+      - recipe[firewall]
+      - recipe[consul_wrapper]
+      - recipe[do-private-net-firewall]
+      - recipe[testrig]

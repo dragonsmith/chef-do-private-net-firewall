@@ -1,0 +1,37 @@
+# Attention! This file is managed by Chef & Consul Template.
+# All local changes will by overwriten.
+<% if @enable_ssh_rule %>
+
+# SSH should always be open
+ufw allow in proto tcp to any port <%= @ssh_port %> from any
+<% end %>
+
+# Rules for private network
+
+{{ $nodes := nodes }}
+{{- $services := services }}
+{{- with $thisNode := node }}
+{{- range $service := $services }}
+{{- range $localService := service $service.Name }}
+{{- if and (eq $thisNode.Node.Node $localService.Node) (and $localService.Port (ne $localService.Port 0)) }}
+{{- range $node := $nodes -}}
+ufw allow in on eth1 from {{ $node.Address }} to any port {{ $localService.Port }} # "Port {{ $localService.Port }} from {{ $node.Node }}"
+{{ end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+# Rules for external network
+
+{{ $nodes := nodes }}
+{{- $services := services }}
+{{- with $thisNode := node }}
+{{- range $service := $services }}
+{{- range $externalService := service (printf "external.%s" $service.Name) }}
+{{- if and (eq $thisNode.Node.Node $externalService.Node) (and $externalService.Port (ne $externalService.Port 0)) }}
+ufw allow in {{ $externalService.Port }} # "Port {{ $externalService.Port }} from anywhere"
+{{ end }}
+{{- end }}
+{{- end }}
+{{- end }}

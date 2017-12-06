@@ -1,0 +1,10 @@
+name             'testrig'
+maintainer       'Kirill Kouznetsov'
+maintainer_email 'agon.smith@gmail.com'
+license          'All rights reserved'
+description      'A helper cookbook for running some tests with Test Kitchen'
+long_description 'A helper cookbook for running some tests with Test Kitchen'
+version          '0.0.1'
+
+depends 'consul'
+depends 'firewall'
